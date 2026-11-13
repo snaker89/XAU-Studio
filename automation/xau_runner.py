@@ -31,7 +31,7 @@ def remaining_text(seconds):
     seconds = max(0, math.ceil(seconds))
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
-    return (f'{hours} Std. ' if hours else '') + f'{minutes} Min. {seconds:02d} Sek.'
+    return (f'{hours} h ' if hours else '') + f'{minutes} min {seconds:02d} sec'
 
 
 def format_runtime_status(status, counts, now, cooldown=0):
@@ -39,28 +39,28 @@ def format_runtime_status(status, counts, now, cooldown=0):
     detail = status.get('detail', '')
     if cooldown > now and mode not in ('completed', 'paused', 'stopped'):
         mode, until = 'rate_limit', cooldown
-    labels = {'processing': 'VERARBEITUNG', 'rate_limit': 'RATENLIMIT',
-              'session': 'ANMELDUNG / SITZUNG', 'restart_budget': 'NEUSTARTBUDGET ERSCHOEPFT',
-              'restart_spacing': 'WARTEZEIT VOR NEUSTART', 'restart_disabled': 'NEUSTARTS DEAKTIVIERT',
-              'recovery': 'WIEDERHERSTELLUNG', 'waiting': 'WARTE AUF WIEDERHOLUNG',
-              'completed': 'ABGESCHLOSSEN', 'paused': 'PAUSIERT', 'stopped': 'GESTOPPT'}
+    labels = {'processing': 'PROCESSING', 'rate_limit': 'RATE LIMIT',
+              'session': 'SIGN-IN / SESSION', 'restart_budget': 'RESTART BUDGET EXHAUSTED',
+              'restart_spacing': 'WAITING BEFORE RESTART', 'restart_disabled': 'RESTARTS DISABLED',
+              'recovery': 'RECOVERY', 'waiting': 'WAITING TO RETRY',
+              'completed': 'COMPLETED', 'paused': 'PAUSED', 'stopped': 'STOPPED'}
     parts = [labels.get(mode, mode.upper())]
     if until > now:
-        action = 'Neustart moeglich in' if mode in ('restart_budget', 'restart_spacing') else 'Weiter in'
+        action = 'Restart available in' if mode in ('restart_budget', 'restart_spacing') else 'Resuming in'
         parts.append(f'{action} {remaining_text(until - now)}')
     elif mode in ('rate_limit', 'restart_budget', 'restart_spacing', 'waiting'):
-        parts.append('Wartefrist abgelaufen; naechste Pruefung steht an')
+        parts.append('Cooldown expired; next check pending')
     if mode == 'rate_limit':
-        parts.append('Automatisch warten; nicht neu starten')
+        parts.append('Waiting automatically; no restart needed')
     elif mode in ('restart_budget', 'restart_spacing'):
-        parts.append('Runner wartet und prueft weiter; Fortschritt gespeichert')
+        parts.append('Runner is waiting and checking; progress saved')
     elif mode == 'restart_disabled':
-        parts.append('Automatische Neustarts sind auf 0 gesetzt')
+        parts.append('Automatic restarts are set to 0')
     if detail and mode != 'rate_limit':
         parts.append(detail)
     verified, total = counts.get('Verified', 0), sum(counts.values())
     open_titles = sum(v for k, v in counts.items() if k not in DONE | {'Failed'})
-    parts.append(f'{verified}/{total} Titel bestaetigt; {open_titles} offen')
+    parts.append(f'{verified}/{total} titles verified; {open_titles} pending')
     return '[STATUS] ' + ' | '.join(parts)
 
 
@@ -84,7 +84,7 @@ def xbox_process_ids():
     from ctypes import wintypes
     session = wintypes.DWORD()
     if not ctypes.windll.kernel32.ProcessIdToSessionId(os.getpid(), ctypes.byref(session)):
-        raise OSError('Windows-Sitzung konnte nicht bestimmt werden')
+        raise OSError('Could not determine the Windows session')
     result = subprocess.run(['tasklist.exe', '/FI', 'IMAGENAME eq XboxPcApp.exe', '/FO', 'CSV', '/NH'],
                             capture_output=True, text=True, check=True, timeout=10,
                             creationflags=subprocess.CREATE_NO_WINDOW)
@@ -98,7 +98,7 @@ def bind_to_terminal(parent_pid):
     if not parent_pid:
         return
     if os.name != "nt":
-        raise RuntimeError("Terminalbindung wird nur unter Windows unterstuetzt.")
+        raise RuntimeError("Terminal binding is only supported on Windows.")
     import ctypes
     from ctypes import wintypes
     kernel = ctypes.WinDLL("kernel32", use_last_error=True)
@@ -110,7 +110,7 @@ def bind_to_terminal(parent_pid):
     kernel.CloseHandle.restype = wintypes.BOOL
     handle = kernel.OpenProcess(0x00100000, False, parent_pid)  # SYNCHRONIZE only
     if not handle:
-        raise RuntimeError("Startendes PowerShell-Fenster ist nicht mehr verfuegbar.")
+        raise RuntimeError("The launching PowerShell window is no longer available.")
 
     def watch():
         result = kernel.WaitForSingleObject(handle, 0xFFFFFFFF)
@@ -253,7 +253,7 @@ class State:
     def bind(self, xuid):
         previous = self.meta("xuid")
         if previous and previous != xuid:
-            raise AccountChanged("Konto hat gewechselt. Fuer ein anderes Konto eine eigene --state Datei verwenden.")
+            raise AccountChanged("Account changed. Use a separate --state file for each account.")
         self.meta("xuid", xuid)
 
     def seed(self, titles, retry_unresolved=False):
@@ -334,7 +334,7 @@ class Runner:
         spacing_until = max(history) + 300 if history else 0
         if budget_until > self.now() or spacing_until > self.now():
             self.status('restart_budget' if budget_until > self.now() else 'restart_spacing',
-                        f'{len(history)}/{self.args.max_restarts} Neustarts in der letzten Stunde',
+                        f'{len(history)}/{self.args.max_restarts} restarts in the last hour',
                         max(budget_until, spacing_until))
             return False
         history.append(self.now())
@@ -344,12 +344,12 @@ class Runner:
         try:
             restart()
         except (OSError, subprocess.SubprocessError) as error:
-            self.state.event(None, 'RestartFailed', type(error).__name__ + ': Sitzung wird erneut geprueft')
-            self.status('session', 'Wiederherstellung fehlgeschlagen; automatischer Versuch folgt unter Beachtung des Neustartbudgets')
+            self.state.event(None, 'RestartFailed', type(error).__name__ + ': Rechecking session')
+            self.status('session', 'Recovery failed; an automatic retry will follow within the restart budget')
             return False
         self.app_identity = None  # Do not interpret our own restart as a new crash.
         self.last_app_check = self.now()
-        self.status('session', 'Apps gestartet; Anmeldung wird automatisch geprueft')
+        self.status('session', 'Apps started; checking sign-in automatically')
         return True
 
     def check_app(self):
@@ -359,19 +359,19 @@ class Runner:
         try:
             identity = self.app_probe()
         except (OSError, subprocess.SubprocessError) as error:
-            self.state.event(None, 'AppCheckFailed', type(error).__name__ + ': Prozessstatus unbekannt')
+            self.state.event(None, 'AppCheckFailed', type(error).__name__ + ': Process status unknown')
             return  # An uncertain probe must never trigger a restart.
         missing = not identity
         changed = bool(identity) and self.app_identity is not None and identity != self.app_identity
         if (missing or changed) and not self.app_recovery_pending:
             self.state.event(None, 'AppMissing' if missing else 'AppChanged',
-                             'Xbox-App fehlt' if missing else 'Xbox-App wurde neu gestartet; XAU-Sitzung erneuern')
+                             'Xbox app is not running' if missing else 'Xbox app restarted; refreshing XAU session')
             self.app_recovery_pending = True
         if identity:
             self.app_identity = identity
         # Restarts never shorten a persisted account rate-limit pause.
         if self.app_recovery_pending and float(self.state.meta('cooldown_until') or 0) <= self.now():
-            if self.try_restart('Xbox-App oeffnen und XAU-Sitzung erneuern', self.app_restart):
+            if self.try_restart('Open Xbox app and refresh XAU session', self.app_restart):
                 self.app_recovery_pending = False
 
     def monitored_sleep(self, seconds):
@@ -392,7 +392,7 @@ class Runner:
         account = self.api.account()
         excluded = getattr(self.args, 'source_account_sha256', None)
         if excluded and hashlib.sha256(account.encode()).hexdigest() == excluded:
-            raise AccountChanged('Noch mit dem Ursprungskonto angemeldet. In der Xbox-App das neue Konto waehlen und XAU neu starten.')
+            raise AccountChanged('Still signed in to the source account. Select the new account in the Xbox app and restart XAU.')
         self.state.bind(account)
         if probe:
             title = self.state.meta("probe_title") or self.args.probe_title
@@ -408,35 +408,35 @@ class Runner:
             if cooldown > 0:
                 self.status('rate_limit', until=self.now() + cooldown)
                 if self.args.health_wait and self.now() + cooldown - started >= self.args.health_wait:
-                    raise RuntimeError("Server-Wartefrist ist laenger als --health-wait; spaeter erneut starten.")
+                    raise RuntimeError("Server cooldown exceeds --health-wait; start again later.")
                 self.sleep(cooldown)
             try:
                 self.healthy(probe)
                 if self.runtime_status and self.runtime_status['mode'] != 'processing':
-                    self.status('processing', 'Sitzung bereit; Verarbeitung wird fortgesetzt')
+                    self.status('processing', 'Session ready; resuming processing')
                 return
             except ApiError as error:
                 failures += 1
                 if self.args.health_wait and self.now() - started >= self.args.health_wait:
-                    raise RuntimeError("XAU bleibt nicht erreichbar oder nicht angemeldet. Fortschritt gespeichert; spaeter erneut starten.")
+                    raise RuntimeError("XAU remains unreachable or signed out. Progress saved; start again later.")
                 self.state.event(None, "WaitingForSession", str(error))
                 if error.kind == 'rate_limit':
                     delay = max(self.args.health_poll, error.retry_after)
                     self.state.meta('cooldown_until', self.now() + delay)
                     self.status('rate_limit', until=self.now() + delay)
                 elif not self.runtime_status or self.runtime_status['mode'] not in ('restart_budget', 'restart_spacing', 'restart_disabled'):
-                    detail = ('Xbox-Anmeldung/Sitzung nicht bereit; automatische Wiederherstellung aktiv. '
-                              'Falls Microsoft ein Anmeldefenster zeigt, dort anmelden.') if error.kind == 'authentication' else 'Xbox-Verbindung nicht bereit; Wiederherstellung wird geprueft'
+                    detail = ('Xbox sign-in/session is not ready; automatic recovery is active. '
+                              'If Microsoft displays a sign-in window, sign in there.') if error.kind == 'authentication' else 'Xbox connection is not ready; checking recovery'
                     self.status('session', detail)
                 # Rate limits must be waited out, not countered by restarting.
                 if error.kind not in ('rate_limit', 'app_unavailable') and failures >= 3:
-                    self.try_restart('XAU-Prozess und lokalen API-Server neu starten', self.restart)
+                    self.try_restart('Restart XAU process and local API server', self.restart)
                 delay = max(self.args.health_poll, error.retry_after)
                 if error.kind == "rate_limit":
                     self.state.meta("cooldown_until", self.now() + delay)
                 # Never send a new request before Retry-After, even if the health deadline is nearer.
                 if self.args.health_wait and self.now() + delay - started >= self.args.health_wait:
-                    raise RuntimeError("Wartefrist erreicht; Warteschlange bleibt erhalten.")
+                    raise RuntimeError("Wait limit reached; queue preserved.")
                 self.sleep(delay)
 
     def verify(self, title, unsupported_ids=()):
@@ -523,7 +523,7 @@ class Runner:
             cooldown = float(self.state.meta("cooldown_until") or 0)
             wait = max(job["due"], cooldown) - self.now()
             if wait > 0:
-                self.state.event(None, "Cooldown", f"{wait:.0f} Sekunden")
+                self.state.event(None, "Cooldown", f"{wait:.0f} seconds")
                 self.status('rate_limit' if cooldown >= job['due'] else 'waiting', until=self.now() + wait)
                 self.sleep(wait)
             self.process(job)
@@ -537,12 +537,12 @@ def load_titles(path):
     with Path(path).open(encoding="utf-8-sig", newline="") as source:
         rows = csv.DictReader(source)
         if "ID" not in (rows.fieldnames or []):
-            raise ValueError("CSV benoetigt Spalte ID.")
+            raise ValueError("CSV requires an ID column.")
         titles = {}
         for line, row in enumerate(rows, 2):
             title = (row.get("ID") or "").strip()
             if not title.isascii() or not title.isdigit() or not 0 < int(title) <= 4294967295:
-                raise ValueError(f"Ungueltige Title ID in Zeile {line}")
+                raise ValueError(f"Invalid title ID on line {line}")
             titles.setdefault(str(int(title)), row.get("Game Title") or "")
         return list(titles.items())
 
@@ -551,23 +551,23 @@ def load_verified_manifest(path):
     """Read an immutable selection of titles verified on the source account."""
     data = json.loads(Path(path).read_text(encoding='utf-8-sig'))
     if not isinstance(data, dict) or data.get('schema_version') != 1:
-        raise ValueError('Ungueltige Liste bestaetigter Titel.')
+        raise ValueError('Invalid verified title list.')
     fingerprint = data.get('source_account_sha256', '')
     if not isinstance(fingerprint, str) or len(fingerprint) != 64 or any(c not in '0123456789abcdef' for c in fingerprint):
-        raise ValueError('Ungueltige Kontobindung der Titelliste.')
+        raise ValueError('Invalid account binding in title list.')
     rows = data.get('titles')
     if not isinstance(rows, list) or not rows:
-        raise ValueError('Die Liste bestaetigter Titel ist leer.')
+        raise ValueError('The verified title list is empty.')
     titles = {}
     for row in rows:
         if not isinstance(row, dict) or row.get('source_status') != 'Verified':
-            raise ValueError('Die separate Liste darf nur bestaetigte Titel enthalten.')
+            raise ValueError('The separate list must contain only verified titles.')
         title = str(row.get('id', ''))
         if not title.isascii() or not title.isdigit() or not 0 < int(title) <= 4294967295:
-            raise ValueError('Ungueltige Title ID in der separaten Liste.')
+            raise ValueError('Invalid title ID in the separate list.')
         title = str(int(title))
         if title in titles or not isinstance(row.get('name'), str):
-            raise ValueError('Doppelte Title ID oder ungueltiger Titelname.')
+            raise ValueError('Duplicate title ID or invalid title name.')
         titles[title] = row['name']
     return list(titles.items()), fingerprint
 
@@ -588,7 +588,7 @@ def endpoint_lock(base):
             try:
                 msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
             except OSError:
-                raise AlreadyRunning("Ein Runner verwendet diesen XAU-Port bereits.") from None
+                raise AlreadyRunning("A runner is already using this XAU port.") from None
             try:
                 yield
             finally:
@@ -637,16 +637,16 @@ def parse_args(argv=None):
     p.add_argument("--probe-title", default="978050046", help="Known readable achievement title for outage checks")
     args = p.parse_args(argv)
     if not args.probe_title.isascii() or not args.probe_title.isdigit() or not 0 < int(args.probe_title) <= 4294967295:
-        p.error("--probe-title muss eine gueltige Title ID sein.")
+        p.error("--probe-title must be a valid title ID.")
     url = urllib.parse.urlparse(args.base)
     if url.scheme != "http" or url.hostname not in ("localhost", "127.0.0.1", "::1") or url.username or url.password or url.path not in ("", "/") or url.query or url.fragment:
-        p.error("--base muss eine lokale HTTP-Adresse sein.")
+        p.error("--base must be a local HTTP address.")
     for name in ("attempts", "verify_polls", "health_poll", "retry_delay"):
         if getattr(args, name) <= 0:
-            p.error(f"--{name.replace('_', '-')} muss positiv sein.")
+            p.error(f"--{name.replace('_', '-')} must be positive.")
     for name in ("delay", "verify_delay", "max_titles", "max_restarts", "health_wait"):
         if getattr(args, name) < 0:
-            p.error(f"--{name.replace('_', '-')} darf nicht negativ sein.")
+            p.error(f"--{name.replace('_', '-')} must not be negative.")
     return args
 
 
@@ -659,16 +659,16 @@ def main(argv=None):
         titles, args.source_account_sha256 = load_verified_manifest(args.verified_manifest)
     else:
         titles = load_titles(args.csv)
-    print(f"{len(titles)} eindeutige Titel; Datenbank: {args.state}")
+    print(f"{len(titles)} unique titles; database: {args.state}")
     if not args.execute:
-        print("Vorschau: keine API-Aufrufe, keine Freischaltungen, keine Neustarts.")
+        print("Preview: no API calls, no unlocks, no restarts.")
         if args.state.exists():
             with contextlib.closing(sqlite3.connect(args.state.resolve().as_uri() + "?mode=ro", uri=True)) as db:
                 print(dict(db.execute("SELECT status,COUNT(*) FROM jobs GROUP BY status")))
         return 0
     bind_to_terminal(args.parent_pid)
     if args.auto_restart and not args.exe.is_file():
-        raise ValueError("Gepatchte XAU.exe fehlt. Zuerst Build-Xau.ps1 ausfuehren oder --exe angeben.")
+        raise ValueError("Patched XAU.exe is missing. Run Build-Xau.ps1 first or specify --exe.")
     with endpoint_lock(args.base):
         state = State(args.state)
         runner = None
@@ -680,18 +680,18 @@ def main(argv=None):
             app_restart = (lambda: restart_xau(args.exe.resolve(), urllib.parse.urlparse(args.base).port or 80, restart_xbox=False)) if app_probe else None
             runner = Runner(api, state, args, restart=restart, app_probe=app_probe, app_restart=app_restart)
             if app_probe:
-                state.event(None, 'AppMonitorStarted', 'Lokale Xbox-Prozesspruefung alle 15 Sekunden zwischen Anfragen und in Wartepausen aktiv')
-            state.event(None, "RunStarted", "Warteschlange wird mit gespeichertem Fortschritt fortgesetzt")
-            runner.status('session', 'XAU und Xbox-Anmeldung werden geprueft')
+                state.event(None, 'AppMonitorStarted', 'Local Xbox process check active every 15 seconds between requests and during cooldowns')
+            state.event(None, "RunStarted", "Resuming queue from saved progress")
+            runner.status('session', 'Checking XAU and Xbox sign-in')
             counts = runner.run()
             print(json.dumps(counts, ensure_ascii=False))
             unresolved = sum(value for key, value in counts.items() if key not in DONE)
             if state.next() is None:
-                runner.status('completed', f'Warteschlange abgearbeitet; {unresolved} Titel bleiben unbestaetigt')
-                state.event(None, "RunCompleted", f"Warteschlange abgearbeitet; {unresolved} Titel bleiben unbestaetigt. Kein Absturz.")
+                runner.status('completed', f'Queue processed; {unresolved} titles remain unverified')
+                state.event(None, "RunCompleted", f"Queue processed; {unresolved} titles remain unverified. No crash occurred.")
             else:
-                runner.status('paused', 'Schrittlimit erreicht; denselben Starter zum Fortsetzen verwenden')
-                state.event(None, "RunPaused", "Schrittlimit erreicht; Fortschritt gespeichert")
+                runner.status('paused', 'Step limit reached; use the same launcher to resume')
+                state.event(None, "RunPaused", "Step limit reached; progress saved")
             return 0 if all(key in DONE for key in counts) else 2
         except Exception as error:
             if runner:
@@ -700,8 +700,8 @@ def main(argv=None):
             raise
         except KeyboardInterrupt:
             if runner:
-                runner.status('paused', 'Benutzerabbruch; denselben Starter zum Fortsetzen verwenden')
-            state.event(None, "RunPaused", "Benutzerabbruch; Fortschritt gespeichert")
+                runner.status('paused', 'Canceled by user; use the same launcher to resume')
+            state.event(None, "RunPaused", "Canceled by user; Progress saved")
             raise
         finally:
             state.export(args.report)
@@ -711,7 +711,7 @@ def main(argv=None):
 def show_status(path):
     path = Path(path).resolve()
     if not path.exists():
-        print("Noch kein gespeicherter Fortschritt.")
+        print("No saved progress yet.")
         return
     with contextlib.closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)) as db:
         counts = dict(db.execute("SELECT status,COUNT(*) FROM jobs GROUP BY status"))
@@ -720,28 +720,28 @@ def show_status(path):
         if saved:
             snapshot = json.loads(saved[0])
             print(format_runtime_status(snapshot, counts, time.time(), float(cooldown_row[0]) if cooldown_row else 0))
-            print(f"Gespeicherter Status vor {max(0, int(time.time()-snapshot['updated']))} Sekunden; keine Live-Prozesspruefung.")
-        print("Fortschritt: " + ", ".join(f"{key}: {value}" for key, value in counts.items()))
+            print(f"Status saved {max(0, int(time.time()-snapshot['updated']))} seconds ago; no live process check.")
+        print("Progress: " + ", ".join(f"{key}: {value}" for key, value in counts.items()))
         cooldown = db.execute("SELECT value FROM meta WHERE key='cooldown_until'").fetchone()
         remaining = max(0, math.ceil(float(cooldown[0]) - time.time())) if cooldown else 0
         if remaining and (not saved or snapshot['mode'] not in ('completed', 'paused', 'stopped')):
             minutes, seconds = divmod(remaining, 60)
-            print(f"Xbox-Ratenlimit: Pause noch {minutes} Min. {seconds:02d} Sek.")
-            print("Bei laufendem Runner wird nach Ablauf automatisch erneut versucht. Kein Neustart erforderlich.")
+            print(f"Xbox rate limit: cooldown remaining {minutes} min {seconds:02d} sec")
+            print("An active runner will retry automatically after the cooldown. No restart required.")
         row = db.execute("SELECT time,title,status,reason FROM events ORDER BY rowid DESC LIMIT 1").fetchone()
         if row:
-            print(f"Letzte Aktivitaet vor {max(0, int(time.time()-row[0]))} Sekunden: {row[2]} - {row[3]}")
-        print(f"Datenbank: {path}")
+            print(f"Last activity {max(0, int(time.time()-row[0]))} seconds ago: {row[2]} - {row[3]}")
+        print(f"Database: {path}")
 
 
 if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
-        print("Gestoppt. Beim naechsten Start wird anhand der Datenbank fortgesetzt.")
+        print("Stopped. The next start will resume from the database.")
         sys.exit(130)
     except AlreadyRunning:
-        print("Die Automatik laeuft bereits. Es wird kein zweiter Runner gestartet.")
+        print("Automation is already running. A second runner will not be started.")
         show_status(parse_args().state)
         sys.exit(0)
     except (AccountChanged, RuntimeError, ValueError, sqlite3.Error, OSError, subprocess.SubprocessError) as error:

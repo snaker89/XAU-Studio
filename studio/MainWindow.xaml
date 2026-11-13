@@ -1,69 +1,69 @@
-<Window x:Class="XauStudio.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="XAU Studio" Width="1280" Height="850" MinWidth="1060" MinHeight="700" Background="#0B1320" FontFamily="Segoe UI" FontSize="13" WindowStartupLocation="CenterScreen">
+<Window x:Class="XauStudio.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Language="en-US" Title="XAU Studio" Width="1280" Height="850" MinWidth="1060" MinHeight="700" Background="#0B1320" FontFamily="Segoe UI" FontSize="13" WindowStartupLocation="CenterScreen">
  <Grid>
   <Grid.ColumnDefinitions><ColumnDefinition Width="245"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
   <Border Background="#111C2D" BorderBrush="#233147" BorderThickness="0,0,1,0" Padding="22,26">
    <DockPanel>
     <StackPanel DockPanel.Dock="Bottom">
-     <Border Background="#1A2D33" CornerRadius="8" Padding="12"><StackPanel><TextBlock Text="DIREKTE VERBINDUNG" Foreground="#79D8B0" FontSize="11" FontWeight="Bold"/><TextBlock Text="Keine laufende Xbox-App nötig. Konten werden hier verwaltet." TextWrapping="Wrap" Margin="0,7,0,0" Foreground="#A5B8C5"/></StackPanel></Border>
-     <TextBlock Text="XAU Studio 1.0 · Lokal gespeichert" FontSize="10" Foreground="#70839A" Margin="0,18,0,0"/>
+     <Border Background="#1A2D33" CornerRadius="8" Padding="12"><StackPanel><TextBlock Text="DIRECT CONNECTION" Foreground="#79D8B0" FontSize="11" FontWeight="Bold"/><TextBlock Text="The Xbox app does not need to run. Manage accounts here." TextWrapping="Wrap" Margin="0,7,0,0" Foreground="#A5B8C5"/></StackPanel></Border>
+     <TextBlock Text="XAU Studio 1.0 · Saved locally" FontSize="10" Foreground="#70839A" Margin="0,18,0,0"/>
     </StackPanel>
     <StackPanel>
      <TextBlock Text="XAU" FontSize="38" FontWeight="Bold" Foreground="#91E8BC"/><TextBlock Text="S T U D I O" FontSize="12" Foreground="#94A5B9" Margin="2,0,0,30"/>
-     <TextBlock Text="DEINE KONTEN" Foreground="#70839A" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10"/>
+     <TextBlock Text="YOUR ACCOUNTS" Foreground="#70839A" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,10"/>
      <ListBox x:Name="AccountsList" Height="135" Background="#142034" Foreground="#E9EEF5" BorderThickness="0" DisplayMemberPath="Name" SelectionChanged="AccountSelected" Padding="5"/>
-     <Button x:Name="AddButton" Content="+ Konto anmelden" Click="AddAccount" Margin="0,12,0,7"/>
-     <Button x:Name="ForgetButton" Content="Sitzung entfernen" Click="ForgetAccount" Margin="0,0,0,28"/>
-     <TextBlock Text="Aktives Konto" Foreground="#70839A" FontSize="11"/><TextBlock x:Name="AccountName" Text="Noch nicht angemeldet" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,6,0,5"/>
-     <TextBlock x:Name="AuthStatus" Text="Microsoft-Login über „Konto anmelden“." Foreground="#94A5B9" TextWrapping="Wrap" FontSize="12"/>
+     <Button x:Name="AddButton" Content="+ Sign in" Click="AddAccount" Margin="0,12,0,7"/>
+     <Button x:Name="ForgetButton" Content="Remove session" Click="ForgetAccount" Margin="0,0,0,28"/>
+     <TextBlock Text="Active account" Foreground="#70839A" FontSize="11"/><TextBlock x:Name="AccountName" Text="Not signed in" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,6,0,5"/>
+     <TextBlock x:Name="AuthStatus" Text="Use Sign in to connect your Microsoft account." Foreground="#94A5B9" TextWrapping="Wrap" FontSize="12"/>
     </StackPanel>
    </DockPanel>
   </Border>
   <Grid Grid.Column="1" Margin="30,26">
    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
    <DockPanel Margin="0,0,0,22">
-    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center"><Button x:Name="StartButton" Content="▶  Start / Fortsetzen" Background="#78D9A4" Foreground="#092719" FontWeight="SemiBold" Click="StartRun"/><Button x:Name="PauseButton" Content="Ⅱ  Pause" Click="PauseRun" IsEnabled="False" Margin="0"/></StackPanel>
-    <StackPanel><TextBlock Text="Deine Titel. Dein Fortschritt." FontSize="25" FontWeight="SemiBold"/><TextBlock Text="Konten getrennt. Jeder Schritt gespeichert." Foreground="#94A5B9" Margin="0,5,0,0"/></StackPanel>
+    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center"><Button x:Name="StartButton" Content="▶  Start / Resume" Background="#78D9A4" Foreground="#092719" FontWeight="SemiBold" Click="StartRun"/><Button x:Name="PauseButton" Content="Ⅱ  Pause" Click="PauseRun" IsEnabled="False" Margin="0"/></StackPanel>
+    <StackPanel><TextBlock Text="Your titles. Your progress." FontSize="25" FontWeight="SemiBold"/><TextBlock Text="Separate accounts. Every step saved." Foreground="#94A5B9" Margin="0,5,0,0"/></StackPanel>
    </DockPanel>
    <Border Grid.Row="1" Background="#192A40" CornerRadius="10" Padding="20,16" Margin="0,0,0,18">
-    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel><TextBlock x:Name="StatusTitle" Text="BEREIT ZUR ANMELDUNG" FontWeight="Bold" Foreground="#91E8BC" FontSize="14"/><TextBlock x:Name="StatusDetail" Text="Melde ein Konto an oder sieh dir die bisherigen Ergebnisse an." Foreground="#B3C3D7" Margin="0,7,16,0" TextWrapping="Wrap"/></StackPanel><TextBlock Grid.Column="1" x:Name="Countdown" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/></Grid>
+    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel><TextBlock x:Name="StatusTitle" Text="READY TO SIGN IN" FontWeight="Bold" Foreground="#91E8BC" FontSize="14"/><TextBlock x:Name="StatusDetail" Text="Sign in to an account or view previous results." Foreground="#B3C3D7" Margin="0,7,16,0" TextWrapping="Wrap"/></StackPanel><TextBlock Grid.Column="1" x:Name="Countdown" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"/></Grid>
    </Border>
    <UniformGrid Grid.Row="2" Columns="5" Margin="0,0,0,18">
-    <Border Background="#111E30" CornerRadius="8" Padding="15" Margin="0,0,10,0"><StackPanel><TextBlock Text="TITEL GESAMT" FontSize="10" Foreground="#94A5B9"/><TextBlock x:Name="TotalCount" Text="—" FontSize="28" Margin="0,5,0,0"/></StackPanel></Border>
-    <Border Background="#111E30" CornerRadius="8" Padding="15" Margin="0,0,10,0"><StackPanel><TextBlock Text="BESTÄTIGT" FontSize="10" Foreground="#94A5B9"/><TextBlock x:Name="VerifiedCount" Text="—" Foreground="#91E8BC" FontSize="28" Margin="0,5,0,0"/></StackPanel></Border>
-    <Border Background="#19372E" CornerRadius="8" Padding="15" Margin="0,0,10,0" ToolTip="Nur Spiele, die in diesem Lauf von unvollständig auf vollständig gewechselt sind und neue bestätigte Erfolge erhalten haben. Jeder Start beginnt einen neuen Lauf."><StackPanel><TextBlock x:Name="RunCountLabel" Text="NEU VOLLSTÄNDIG · LAUF" FontSize="10" Foreground="#91E8BC" TextWrapping="Wrap"/><TextBlock x:Name="RunCompletedCount" Text="—" Foreground="#91E8BC" FontSize="28" Margin="0,5,0,0"/></StackPanel></Border>
-    <Border Background="#111E30" CornerRadius="8" Padding="15" Margin="0,0,10,0"><StackPanel><TextBlock Text="NOCH OFFEN" FontSize="10" Foreground="#94A5B9"/><TextBlock x:Name="OpenCount" Text="—" FontSize="28" Margin="0,5,0,0"/></StackPanel></Border>
-    <Border Background="#111E30" CornerRadius="8" Padding="15"><StackPanel><TextBlock Text="FEHLER / AUSGESCHLOSSEN" FontSize="10" Foreground="#94A5B9" TextWrapping="Wrap"/><TextBlock x:Name="ErrorCount" Text="—" Foreground="#EDBE82" FontSize="28" Margin="0,5,0,0"/></StackPanel></Border>
+    <Border Background="#111E30" CornerRadius="8" Padding="15" Margin="0,0,10,0"><StackPanel><TextBlock Text="TOTAL TITLES" FontSize="10" Foreground="#94A5B9"/><TextBlock x:Name="TotalCount" Text="—" FontSize="28" Margin="0,5,0,0"/></StackPanel></Border>
+    <Border Background="#111E30" CornerRadius="8" Padding="15" Margin="0,0,10,0"><StackPanel><TextBlock Text="VERIFIED" FontSize="10" Foreground="#94A5B9"/><TextBlock x:Name="VerifiedCount" Text="—" Foreground="#91E8BC" FontSize="28" Margin="0,5,0,0"/></StackPanel></Border>
+    <Border Background="#19372E" CornerRadius="8" Padding="15" Margin="0,0,10,0" ToolTip="Only games completed during this run with newly verified achievements. Each start begins a new run."><StackPanel><TextBlock x:Name="RunCountLabel" Text="NEWLY COMPLETED · RUN" FontSize="10" Foreground="#91E8BC" TextWrapping="Wrap"/><TextBlock x:Name="RunCompletedCount" Text="—" Foreground="#91E8BC" FontSize="28" Margin="0,5,0,0"/></StackPanel></Border>
+    <Border Background="#111E30" CornerRadius="8" Padding="15" Margin="0,0,10,0"><StackPanel><TextBlock Text="REMAINING" FontSize="10" Foreground="#94A5B9"/><TextBlock x:Name="OpenCount" Text="—" FontSize="28" Margin="0,5,0,0"/></StackPanel></Border>
+    <Border Background="#111E30" CornerRadius="8" Padding="15"><StackPanel><TextBlock Text="ERRORS / EXCLUDED" FontSize="10" Foreground="#94A5B9" TextWrapping="Wrap"/><TextBlock x:Name="ErrorCount" Text="—" Foreground="#EDBE82" FontSize="28" Margin="0,5,0,0"/></StackPanel></Border>
    </UniformGrid>
    <TabControl Grid.Row="3" Background="#111B2B" BorderThickness="0" Padding="0,14,0,0">
     <TabControl.Resources><Style TargetType="TabItem"><Setter Property="Foreground" Value="#CBD6E4"/><Setter Property="Padding" Value="18,10"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TabItem"><Border x:Name="Frame" Background="#1D2B40" Padding="{TemplateBinding Padding}" Margin="0,0,5,0" CornerRadius="6,6,0,0" BorderBrush="#78D9A4" BorderThickness="0"><ContentPresenter ContentSource="Header"/></Border><ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="Frame" Property="Background" Value="#29453F"/><Setter TargetName="Frame" Property="BorderThickness" Value="0,0,0,2"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style></TabControl.Resources>
-    <TabItem Header="Titelliste">
+    <TabItem Header="Title list">
      <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-      <DockPanel Margin="0,0,0,12"><Button DockPanel.Dock="Right" Content="CSV exportieren" Click="ExportCsv" Margin="8,0,0,0"/><ComboBox x:Name="ViewSelect" SelectedIndex="0" SelectionChanged="ViewChanged" Padding="9" MinWidth="240"><ComboBoxItem Content="Aktives Konto / Titelauswahl"/><ComboBoxItem Content="Bisheriger Hauptlauf · nur Ansicht"/><ComboBoxItem Content="Bisheriger zweiter Account · nur Ansicht"/></ComboBox></DockPanel>
-      <Grid Grid.Row="1" Margin="0,0,0,12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="200"/></Grid.ColumnDefinitions><TextBox x:Name="SearchBox" ToolTip="Titel oder ID suchen" TextChanged="SearchChanged"/><TextBlock Text="Titel oder ID suchen …" Foreground="#8195AE" Margin="11,9" IsHitTestVisible="False"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock><ComboBox Grid.Column="1" x:Name="FilterSelect" SelectedIndex="0" SelectionChanged="SearchChanged" Margin="10,0,0,0" Padding="8"><ComboBoxItem Content="Alle Status"/><ComboBoxItem Content="Bestätigt"/><ComboBoxItem Content="Offen / Wiederholung"/><ComboBoxItem Content="Fehler / ausgeschlossen"/><ComboBoxItem Content="Nicht unterstützt"/></ComboBox></Grid>
-      <DataGrid Grid.Row="2" x:Name="TitlesGrid" SelectionMode="Single" MouseDoubleClick="TitleDetails"><DataGrid.Columns><DataGridTextColumn Header="TITEL" Binding="{Binding Name}" Width="*"/><DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="105"/><DataGridTextColumn Header="STATUS" Binding="{Binding Label}" Width="150"/><DataGridTextColumn Header="VERSUCHE" Binding="{Binding Attempts}" Width="85"/></DataGrid.Columns></DataGrid>
-      <DockPanel Grid.Row="3" Margin="0,10,0,0"><TextBlock x:Name="TableInfo" Foreground="#94A5B9" FontSize="11"/><TextBlock Text="Doppelklick: Details und Fehlergrund" HorizontalAlignment="Right" Foreground="#70839A" FontSize="11"/></DockPanel>
+      <DockPanel Margin="0,0,0,12"><Button DockPanel.Dock="Right" Content="Export CSV" Click="ExportCsv" Margin="8,0,0,0"/><ComboBox x:Name="ViewSelect" SelectedIndex="0" SelectionChanged="ViewChanged" Padding="9" MinWidth="240"><ComboBoxItem Content="Active account / title selection"/><ComboBoxItem Content="Previous main run · read only"/><ComboBoxItem Content="Previous second account · read only"/></ComboBox></DockPanel>
+      <Grid Grid.Row="1" Margin="0,0,0,12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="200"/></Grid.ColumnDefinitions><TextBox x:Name="SearchBox" ToolTip="Search by title or ID" TextChanged="SearchChanged"/><TextBlock Text="Search by title or ID …" Foreground="#8195AE" Margin="11,9" IsHitTestVisible="False"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock><ComboBox Grid.Column="1" x:Name="FilterSelect" SelectedIndex="0" SelectionChanged="SearchChanged" Margin="10,0,0,0" Padding="8"><ComboBoxItem Content="All statuses"/><ComboBoxItem Content="Verified"/><ComboBoxItem Content="Pending / Retry"/><ComboBoxItem Content="Errors / Excluded"/><ComboBoxItem Content="Unsupported"/></ComboBox></Grid>
+      <DataGrid Grid.Row="2" x:Name="TitlesGrid" SelectionMode="Single" MouseDoubleClick="TitleDetails"><DataGrid.Columns><DataGridTextColumn Header="TITLE" Binding="{Binding Name}" Width="*"/><DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="105"/><DataGridTextColumn Header="STATUS" Binding="{Binding Label}" Width="150"/><DataGridTextColumn Header="ATTEMPTS" Binding="{Binding Attempts}" Width="85"/></DataGrid.Columns></DataGrid>
+      <DockPanel Grid.Row="3" Margin="0,10,0,0"><TextBlock x:Name="TableInfo" Foreground="#94A5B9" FontSize="11"/><TextBlock Text="Double-click for details and error reason" HorizontalAlignment="Right" Foreground="#70839A" FontSize="11"/></DockPanel>
      </Grid>
     </TabItem>
-    <TabItem Header="Protokoll"><TextBox x:Name="LogBox" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12" BorderThickness="0"/></TabItem>
-    <TabItem Header="Einstellungen">
+    <TabItem Header="Log"><TextBox x:Name="LogBox" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12" BorderThickness="0"/></TabItem>
+    <TabItem Header="Settings">
      <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Margin="20">
-      <TextBlock Text="Verarbeitung" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,12"/>
-      <CheckBox x:Name="AutoResume" Content="Beim Öffnen das zuletzt verwendete Konto anmelden und fortsetzen" Checked="SavePreferences" Unchecked="SavePreferences"/>
-      <TextBlock Text="Beginnt erst nach erfolgreicher Konto- und Sitzungskontrolle. Ein anderer aktiver Lauf sperrt den Start." TextWrapping="Wrap" Foreground="#94A5B9" Margin="20,2,0,18"/>
-      <TextBlock Text="Pause zwischen Titeln (Sekunden, 3–300)"/><TextBox x:Name="DelayInput" Text="3" Width="100" HorizontalAlignment="Left" Margin="0,8,0,12" LostFocus="SavePreferences"/>
-      <CheckBox x:Name="RandomTitleOrder" Content="Titel in zufälliger Reihenfolge bearbeiten" Checked="SavePreferences" Unchecked="SavePreferences"/>
-      <TextBlock Text="Gilt ab dem nächsten Start / Fortsetzen. Pro Spiel werden weiterhin alle unterstützten Erfolge bearbeitet und geprüft. Ausgeschaltet gilt die bisherige Listenreihenfolge; Wartefristen bleiben erhalten." TextWrapping="Wrap" Foreground="#94A5B9" Margin="20,2,0,12"/>
-      <CheckBox x:Name="RetryCheck" Content="Beim nächsten Start Titel mit „Prüfung nötig“ erneut versuchen"/>
-      <TextBlock Text="Als fehlerhaft ausgeschlossene Titel bleiben ausgeschlossen. Ratenlimits gelten unabhängig von diesen Einstellungen." TextWrapping="Wrap" Foreground="#94A5B9" Margin="20,2,0,20"/>
-      <WrapPanel><Button x:Name="ImportButton" Content="Titelliste aus CSV ergänzen" Click="ImportCsv"/><Button Content="Datenordner öffnen" Click="OpenData"/></WrapPanel>
-      <TextBlock Text="Anmeldung &amp; Kontowechsel" FontSize="20" FontWeight="SemiBold" Margin="0,28,0,10"/>
-      <TextBlock Text="Links ein gespeichertes Konto wählen oder erneut anmelden. Vor einem Wechsel wird die laufende Verarbeitung pausiert. Anmeldedaten werden durch Windows für diesen Windows-Benutzer verschlüsselt. Passwörter werden nicht gespeichert." TextWrapping="Wrap" Foreground="#B3C3D7"/>
-      <TextBlock Text="Die Xbox-App hat eine eigene Sitzung. Die Auswahl hier ändert diese nicht. XAU Studio verwendet den direkten OAuth-Login aus XAU; eine Emulation der Xbox-App ist nicht erforderlich. Die Anmeldung und die erlaubten Zugriffe werden von Microsoft geprüft." TextWrapping="Wrap" Foreground="#B3C3D7" Margin="0,12,0,0"/>
-      <TextBlock Text="Unterstützt: Titelwarteschlange, direkte titelbasierte Updates, anschließende Verifikation und Xbox-360-Erkennung. Ereignisbasierte Erfolge und Xbox-360-Freischaltungen sind nicht implementiert." TextWrapping="Wrap" Foreground="#94A5B9" Margin="0,12,0,0"/>
+      <TextBlock Text="Processing" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,12"/>
+      <CheckBox x:Name="AutoResume" Content="Sign in to the last account and resume on startup" Checked="SavePreferences" Unchecked="SavePreferences"/>
+      <TextBlock Text="Starts after account and session verification. Another active run prevents startup." TextWrapping="Wrap" Foreground="#94A5B9" Margin="20,2,0,18"/>
+      <TextBlock Text="Delay between titles (seconds, 3–300)"/><TextBox x:Name="DelayInput" Text="3" Width="100" HorizontalAlignment="Left" Margin="0,8,0,12" LostFocus="SavePreferences"/>
+      <CheckBox x:Name="RandomTitleOrder" Content="Process titles in random order" Checked="SavePreferences" Unchecked="SavePreferences"/>
+      <TextBlock Text="Applies on the next Start / Resume. All supported achievements for each game are still processed and verified. When disabled, titles follow list order. Cooldowns remain in effect." TextWrapping="Wrap" Foreground="#94A5B9" Margin="20,2,0,12"/>
+      <CheckBox x:Name="RetryCheck" Content="Retry titles marked Needs attention on the next start"/>
+      <TextBlock Text="Titles excluded as failed remain excluded. Rate limits apply regardless of these settings." TextWrapping="Wrap" Foreground="#94A5B9" Margin="20,2,0,20"/>
+      <WrapPanel><Button x:Name="ImportButton" Content="Add titles from CSV" Click="ImportCsv"/><Button Content="Open data folder" Click="OpenData"/></WrapPanel>
+      <TextBlock Text="Sign-in &amp; account switching" FontSize="20" FontWeight="SemiBold" Margin="0,28,0,10"/>
+      <TextBlock Text="Select a saved account on the left or sign in again. Processing pauses before switching accounts. Windows encrypts session credentials for the current Windows user. Passwords are not stored." TextWrapping="Wrap" Foreground="#B3C3D7"/>
+      <TextBlock Text="The Xbox app has its own session, which is unaffected by the account selected here. XAU Studio uses direct OAuth sign-in from XAU; Xbox app emulation is unnecessary. Microsoft validates sign-in and access permissions." TextWrapping="Wrap" Foreground="#B3C3D7" Margin="0,12,0,0"/>
+      <TextBlock Text="Supported: title queues, direct title-based updates, subsequent verification and Xbox 360 detection. Event-based achievements and Xbox 360 unlocks are not implemented." TextWrapping="Wrap" Foreground="#94A5B9" Margin="0,12,0,0"/>
      </StackPanel></ScrollViewer>
     </TabItem>
    </TabControl>
-   <Grid Grid.Row="4" Margin="0,16,0,0"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions><ProgressBar x:Name="Progress" Height="4" Maximum="100" Background="#1D2B40" Foreground="#78D9A4" BorderThickness="0"/><TextBlock Grid.Row="1" x:Name="Footer" Text="Start lädt die bisher bestätigte Titelauswahl. Schließen pausiert die Verarbeitung." Foreground="#70839A" FontSize="11" Margin="0,8,0,0"/></Grid>
+   <Grid Grid.Row="4" Margin="0,16,0,0"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions><ProgressBar x:Name="Progress" Height="4" Maximum="100" Background="#1D2B40" Foreground="#78D9A4" BorderThickness="0"/><TextBlock Grid.Row="1" x:Name="Footer" Text="Start loads the selected titles. Closing the app pauses processing." Foreground="#70839A" FontSize="11" Margin="0,8,0,0"/></Grid>
   </Grid>
  </Grid>
 </Window>

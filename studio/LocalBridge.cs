@@ -59,9 +59,9 @@ public sealed class LocalBridge : IAsyncDisposable
             await Send(context, 200, result);
         }
         catch (ServiceException ex) { await TryError(context, ex.Status, new { error = ex.Message, upstreamStatus = ex.Status, retryAfterSeconds = ex.Retry, xboxErrorCode = ex.Code, xboxErrorSource = ex.SourceName }); }
-        catch (SessionException) { await TryError(context, 401, new { error = "Anmeldung erforderlich" }); }
+        catch (SessionException) { await TryError(context, 401, new { error = "Sign-in required" }); }
         catch (OperationCanceledException) { await TryError(context, 503, new { error = "Request canceled" }); }
-        catch (Exception) { await TryError(context, 502, new { error = "Verbindung oder Antwort ungültig" }); }
+        catch (Exception) { await TryError(context, 502, new { error = "Invalid connection or response" }); }
     }
     static async Task TryError(HttpListenerContext context, int status, object data) { try { await Send(context, status, data); } catch { context.Response.Abort(); } }
     static async Task Send(HttpListenerContext context, int status, object data)

@@ -8,7 +8,7 @@ namespace XauStudio;
 public record Account(string Id, string Name) { public override string ToString() => Name; }
 public record TitleRow(string Id, string Name, string Status, int Attempts = 0, string Reason = "", int Total = 0)
 {
-    public string Label => Status switch { "Verified" => "Bestätigt", "Pending" => "Offen", "Retry" => "Wiederholung", "InFlight" => "In Verarbeitung", "Unsupported" => "Nicht unterstützt", "Failed" => "Ausgeschlossen", "NeedsAttention" => "Prüfung nötig", _ => Status };
+    public string Label => Status switch { "Verified" => "Verified", "Pending" => "Pending", "Retry" => "Retry", "InFlight" => "Processing", "Unsupported" => "Unsupported", "Failed" => "Excluded", "NeedsAttention" => "Needs attention", _ => Status };
 }
 public sealed class Preferences
 {
@@ -69,11 +69,11 @@ public static class Storage
         if (PortableAssets.Enabled) return PortableAssets.Extract();
         for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
             if (File.Exists(Path.Combine(dir.FullName, "automation", "xau_runner.py"))) return dir.FullName;
-        throw new DirectoryNotFoundException("Projektordner fehlt.");
+        throw new DirectoryNotFoundException("Project folder is missing.");
     }
     public static string Folder(string id)
     {
-        if (id.Length == 0 || !id.All(char.IsAsciiDigit)) throw new InvalidDataException("Ungültiges Konto.");
+        if (id.Length == 0 || !id.All(char.IsAsciiDigit)) throw new InvalidDataException("Invalid account.");
         return Path.Combine(Data, id);
     }
     public static string State(string id) => Path.Combine(Folder(id), "state.sqlite");

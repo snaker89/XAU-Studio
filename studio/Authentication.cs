@@ -29,7 +29,7 @@ public sealed class Authentication : IDisposable, IXboxSession
     DateTimeOffset expires;
     DateTimeOffset retryAfter;
     public Account? Current { get; private set; }
-    public string State { get; private set; } = "Nicht angemeldet";
+    public string State { get; private set; } = "Not signed in";
     public Authentication() => oauth = new(XboxGameTitles.XboxAppPC, XboxAuthConstants.XboxScope, http);
 
     public async Task<Account> Login(Window owner)
@@ -44,7 +44,7 @@ public sealed class Authentication : IDisposable, IXboxSession
     }
     public async Task<Account> Restore(Account account)
     {
-        State = "Sitzung wird erneuert";
+        State = "Refreshing session";
         var response = await oauth.RefreshToken(new CodeFlowRefreshTokenParameter { RefreshToken = Storage.Token(account.Id) }, default);
         return await Establish(response, account.Id);
     }
@@ -56,15 +56,15 @@ public sealed class Authentication : IDisposable, IXboxSession
         var token = result.AuthorizationToken;
         var id = token?.XuiClaims?.XboxUserId;
         if (id == null || !id.All(char.IsAsciiDigit) || !token!.Validate() || string.IsNullOrEmpty(token.XuiClaims?.UserHash))
-            throw new InvalidDataException("Xbox hat keine gültige Kontositzung geliefert.");
-        if (expected != null && id != expected) throw new InvalidDataException("Kontowechsel erkannt. Sitzung wurde verworfen.");
-        var account = new Account(id, token.XuiClaims!.UniqueModernGamertag ?? token.XuiClaims.Gamertag ?? "Xbox-Konto …" + id[^4..]);
+            throw new InvalidDataException("Xbox did not return a valid account session.");
+        if (expected != null && id != expected) throw new InvalidDataException("Account change detected. Session discarded.");
+        var account = new Account(id, token.XuiClaims!.UniqueModernGamertag ?? token.XuiClaims.Gamertag ?? "Xbox account …" + id[^4..]);
         var refresh = response.RefreshToken;
-        if (string.IsNullOrEmpty(refresh)) throw new InvalidDataException("Microsoft hat keine erneuerbare Sitzung geliefert.");
+        if (string.IsNullOrEmpty(refresh)) throw new InvalidDataException("Microsoft did not return a renewable session.");
         Storage.SaveAccount(account, refresh);
         authorization = $"XBL3.0 x={token.XuiClaims.UserHash};{token.Token}";
         expires = DateTimeOffset.Parse(token.ExpireOn!);
-        retryAfter = default; Current = account; State = "Angemeldet · direkte Verbindung";
+        retryAfter = default; Current = account; State = "Signed in · direct connection";
         return account;
     }
     public async Task<string> Authorization(CancellationToken ct)
@@ -76,15 +76,15 @@ public sealed class Authentication : IDisposable, IXboxSession
             if (expires > DateTimeOffset.UtcNow.AddMinutes(5)) return authorization;
             if (retryAfter > DateTimeOffset.UtcNow) throw new SessionException();
             try { await Restore(Current); }
-            catch { retryAfter = DateTimeOffset.UtcNow.AddMinutes(5); State = "Anmeldung erforderlich · Konto erneut anmelden"; throw new SessionException(); }
+            catch { retryAfter = DateTimeOffset.UtcNow.AddMinutes(5); State = "Sign-in required · sign in to the account again"; throw new SessionException(); }
             return authorization;
         }
         finally { gate.Release(); }
     }
-    public void Invalidate() { expires = default; State = "Sitzung wird erneut geprüft"; }
+    public void Invalidate() { expires = default; State = "Rechecking session"; }
     public void Dispose() { http.Dispose(); gate.Dispose(); }
 }
-public sealed class SessionException : Exception { public SessionException() : base("Anmeldung erforderlich") { } }
+public sealed class SessionException : Exception { public SessionException() : base("Sign-in required") { } }
 
 public sealed class LoginWindow : Window
 {
@@ -95,14 +95,14 @@ public sealed class LoginWindow : Window
     readonly string browserDir = Path.Combine(Storage.Data, "login-webview");
     LoginWindow(Window owner, string url, string state)
     {
-        Owner = owner; Title = "Microsoft-Anmeldung · XAU Studio"; Width = 560; Height = 740;
+        Owner = owner; Title = "Microsoft sign-in · XAU Studio"; Width = 560; Height = 740;
         WindowStartupLocation = WindowStartupLocation.CenterOwner; Content = browser;
         this.state = state; this.url = url;
         Loaded += async (_, _) =>
         {
             try
             {
-                var env = await CoreWebView2Environment.CreateAsync(null, browserDir);
+                var env = await CoreWebView2Environment.CreateAsync(null, browserDir, new CoreWebView2EnvironmentOptions { Language = "en-US" });
                 await browser.EnsureCoreWebView2Async(env);
                 // The browser is used only for this login. No password manager or persisted cookies.
                 browser.CoreWebView2.Settings.IsPasswordAutosaveEnabled = false;
@@ -117,7 +117,7 @@ public sealed class LoginWindow : Window
                     if (next.Host != "login.live.com" || next.AbsolutePath != "/oauth20_desktop.srf") return;
                     e.Cancel = true;
                     var query = HttpUtility.ParseQueryString(next.Query);
-                    if (query["state"] != state) completion.TrySetException(new InvalidDataException("Ungültige Login-Antwort."));
+                    if (query["state"] != state) completion.TrySetException(new InvalidDataException("Invalid sign-in response."));
                     else if (string.IsNullOrEmpty(query["code"])) completion.TrySetException(new SessionException());
                     else completion.TrySetResult(query["code"]!);
                     Close();

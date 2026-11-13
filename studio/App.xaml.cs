@@ -6,6 +6,9 @@ public partial class App : Application
     private Mutex? instance;
     protected override void OnStartup(StartupEventArgs e)
     {
+        var culture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+        System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+        System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
         base.OnStartup(e);
         if (e.Args.Contains("--portable-check"))
         {
@@ -23,10 +26,10 @@ public partial class App : Application
             return;
         }
         instance = new Mutex(true, "Local\\XauStudio.Desktop", out var first);
-        if (!first) { MessageBox.Show("XAU Studio ist bereits geöffnet."); Shutdown(); return; }
+        if (!first) { MessageBox.Show("XAU Studio is already open."); Shutdown(); return; }
         if (e.Args.Contains("--self-test")) { SelfTests.Run(); Shutdown(); return; }
         try { new MainWindow().Show(); }
-        catch (Exception ex) { MessageBox.Show("Start fehlgeschlagen: " + ex.GetType().Name); Shutdown(1); }
+        catch (Exception ex) { MessageBox.Show("Startup failed: " + ex.GetType().Name); Shutdown(1); }
     }
     protected override void OnExit(ExitEventArgs e) { instance?.Dispose(); base.OnExit(e); }
 }

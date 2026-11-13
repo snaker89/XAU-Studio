@@ -37,11 +37,11 @@ class StudioState(queue.State):
             return 0
         with self.db:
             count = self.db.execute("""UPDATE jobs SET status='Pending',attempts=0,due=0,
-                reason='Erneut eingeplant: Update-Anfrageformat korrigiert'
+                reason='Rescheduled: update request format corrected'
                 WHERE status IN ('Retry','NeedsAttention') AND reason='rejected (HTTP 400)'""").rowcount
             self.db.execute('INSERT OR REPLACE INTO meta VALUES (?,?)', ('studio_progress_update_schema', '1'))
         if count:
-            self.event(None, 'RequestFormatFixed', f'{count} durch HTTP 400 blockierte Titel erneut eingeplant')
+            self.event(None, 'RequestFormatFixed', f'{count} titles blocked by HTTP 400 rescheduled')
         return count
 
 
@@ -97,7 +97,7 @@ def main():
                         args.state.parent.mkdir(parents=True, exist_ok=True)
                         with contextlib.closing(sqlite3.connect(args.state)) as target:
                             source.backup(target)
-                        print('[STUDIO] Bisheriger Kontofortschritt sicher übernommen.', flush=True)
+                        print('[STUDIO] Previous account progress imported safely.', flush=True)
                         break
         random_titles = os.environ.get('XAU_STUDIO_RANDOM_TITLES') == '1'
         state = StudioState(args.state, random_titles=random_titles)
@@ -111,7 +111,7 @@ def main():
                 for row in json.loads(extra.read_text(encoding='utf-8-sig')):
                     title = row['Id']
                     if not isinstance(title, str) or not title.isascii() or not title.isdigit() or not 0 < int(title) <= 4294967295:
-                        raise ValueError('Ungültige zusätzliche Title ID')
+                        raise ValueError('Invalid additional title ID')
                     titles.append((str(int(title)), row['Name']))
             state.bind(account)
             state.seed(titles, args.retry_unresolved)
@@ -121,17 +121,17 @@ def main():
             api = StudioApi(args.base)
             api.opener.add_handler(KeyHandler())
             runner = StudioRunner(api, state, args, sleep=sleep)
-            runner.status('session', 'Direkte Microsoft-/Xbox-Sitzung wird geprüft')
-            state.event(None, 'RunStarted', 'XAU Studio; keine Xbox-App erforderlich')
-            state.event(None, 'TitleOrder', 'Zufällige Titelreihenfolge; alle Erfolge je Spiel' if random_titles else 'Listenreihenfolge; alle Erfolge je Spiel')
+            runner.status('session', 'Checking direct Microsoft/Xbox session')
+            state.event(None, 'RunStarted', 'XAU Studio; Xbox app not required')
+            state.event(None, 'TitleOrder', 'Random title order; all achievements per game' if random_titles else 'List order; all achievements per game')
             counts = runner.run()
-            runner.status('completed' if state.next() is None else 'paused', 'Fortschritt gespeichert')
+            runner.status('completed' if state.next() is None else 'paused', 'Progress saved')
             state.event(None, 'RunCompleted' if state.next() is None else 'RunPaused', str(counts))
             return 0
         except KeyboardInterrupt:
             if runner:
-                runner.status('paused', 'Vom Benutzer pausiert; sicher fortsetzbar')
-            state.event(None, 'RunPaused', 'Benutzerabbruch')
+                runner.status('paused', 'Paused by user; safe to resume')
+            state.event(None, 'RunPaused', 'Canceled by user')
             return 0
         except Exception as error:
             if runner:
@@ -147,8 +147,8 @@ if __name__ == '__main__':
     try:
         sys.exit(main())
     except queue.AlreadyRunning:
-        print('[STUDIO] Ein bisheriger XAU-Lauf ist noch aktiv. Bitte dessen Terminal schließen, dann hier starten.', flush=True)
+        print('[STUDIO] A previous XAU run is still active. Close its terminal, then start here.', flush=True)
         sys.exit(3)
     except Exception as error:
-        print('[STUDIO] Lauf gestoppt: ' + type(error).__name__, flush=True)
+        print('[STUDIO] Run stopped: ' + type(error).__name__, flush=True)
         sys.exit(1)

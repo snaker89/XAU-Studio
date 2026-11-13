@@ -8,4 +8,4 @@
 - Corrected achievement update payload (`action: progressUpdate`).
 - Improved error codes, rate-limit handling, and restart behavior.
 
-No title catalogue or binary is included. CSV import works without a bundled catalogue. Repository documentation is in English; the desktop interface is currently in German.
+No title catalogue or binary is included. CSV import works without a bundled catalogue.

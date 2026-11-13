@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 namespace XauStudio;
 
-public sealed class ServiceException(int status, double retry = 0, int? code = null, string? source = null) : Exception($"Xbox-Dienst: HTTP {status}")
+public sealed class ServiceException(int status, double retry = 0, int? code = null, string? source = null) : Exception($"Xbox service: HTTP {status}")
 {
     public int Status { get; } = status;
     public double Retry { get; } = retry;
@@ -39,7 +39,7 @@ public sealed class XboxService(IXboxSession auth, HttpMessageHandler? handler =
             try { var error = JsonNode.Parse(raw); code = error?["code"]?.GetValue<int>(); source = error?["source"]?.GetValue<string>(); } catch { }
             throw new ServiceException((int)response.StatusCode, retry, code, source);
         }
-        return string.IsNullOrWhiteSpace(raw) ? new() : JsonNode.Parse(raw) as JsonObject ?? throw new InvalidDataException("Ungültige Xbox-Antwort.");
+        return string.IsNullOrWhiteSpace(raw) ? new() : JsonNode.Parse(raw) as JsonObject ?? throw new InvalidDataException("Invalid Xbox response.");
     }
     public Task<JsonObject> Profile(CancellationToken ct) => Request($"https://profile.xboxlive.com/users/xuid({auth.Current!.Id})/profile/settings?settings=Gamertag", 2, ct);
     public async Task<JsonObject> Achievements(string title, CancellationToken ct)
@@ -50,7 +50,7 @@ public sealed class XboxService(IXboxSession auth, HttpMessageHandler? handler =
             var url = $"https://achievements.xboxlive.com/users/xuid({auth.Current!.Id})/achievements?titleId={title}&maxItems=1000";
             if (continuation != null) url += "&continuationToken=" + Uri.EscapeDataString(continuation);
             var page = await Request(url, 4, ct);
-            if (page["achievements"] is not JsonArray items) throw new InvalidDataException("Erfolge fehlen in der Antwort.");
+            if (page["achievements"] is not JsonArray items) throw new InvalidDataException("Achievements are missing from the response.");
             foreach (var item in items) result.Add(item?.DeepClone());
             continuation = page["pagingInfo"]?["continuationToken"]?.GetValue<string>();
             if (continuation == "") continuation = null;

@@ -7,14 +7,14 @@ public static class CatalogImport
     {
         using var parser = new TextFieldParser(file, System.Text.Encoding.UTF8) { TextFieldType = FieldType.Delimited, HasFieldsEnclosedInQuotes = true };
         parser.SetDelimiters(",");
-        var header = parser.ReadFields() ?? throw new InvalidDataException("Leere CSV.");
+        var header = parser.ReadFields() ?? throw new InvalidDataException("Empty CSV file.");
         var idColumn = Array.IndexOf(header, "ID"); var nameColumn = Array.IndexOf(header, "Game Title");
-        if (idColumn < 0) throw new InvalidDataException("CSV benötigt die Spalte ID.");
+        if (idColumn < 0) throw new InvalidDataException("CSV requires an ID column.");
         var result = new Dictionary<string, TitleRow>();
         while (!parser.EndOfData)
         {
             var row = parser.ReadFields()!;
-            if (row.Length <= idColumn || !uint.TryParse(row[idColumn], out var id) || id == 0) throw new InvalidDataException("Ungültige Title ID.");
+            if (row.Length <= idColumn || !uint.TryParse(row[idColumn], out var id) || id == 0) throw new InvalidDataException("Invalid title ID.");
             var key = id.ToString(); var name = nameColumn >= 0 && row.Length > nameColumn ? row[nameColumn] : key;
             result.TryAdd(key, new TitleRow(key, name, "Pending"));
         }

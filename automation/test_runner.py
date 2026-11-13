@@ -229,7 +229,7 @@ class RunnerTests(unittest.TestCase):
         api.return_value.account.assert_not_called()
         event = self.state.db.execute("SELECT status,reason FROM events ORDER BY rowid DESC LIMIT 1").fetchone()
         self.assertEqual(event["status"], "RunCompleted")
-        self.assertIn("2 Titel", event["reason"])
+        self.assertIn("2 titles", event["reason"])
 
     def test_session_outage_during_title_keeps_attempt(self):
         self.api.account.side_effect = ["1111", x.ApiError("authentication"), "1111"]
@@ -322,7 +322,7 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(self.row()["attempts"], 0)
 
     def test_user_failed_titles_are_never_automatically_requeued(self):
-        self.state.save("123", "Failed", "Vom Benutzer dauerhaft als fehlerhaft markiert")
+        self.state.save("123", "Failed", "Permanently marked as failed by the user")
         self.state.save("456", "NeedsAttention", "no_data")
         self.state.seed([("123", "Example"), ("789", "New title")], retry_unresolved=True)
         self.assertEqual(self.row()["status"], "Failed")
@@ -331,7 +331,7 @@ class RunnerTests(unittest.TestCase):
             pending.append(job["id"])
             self.state.save(job["id"], "Verified")
         self.assertEqual(set(pending), {"456", "789"})
-        self.assertEqual(self.row()["reason"], "Vom Benutzer dauerhaft als fehlerhaft markiert")
+        self.assertEqual(self.row()["reason"], "Permanently marked as failed by the user")
 
     def test_achievement_service_outage_pauses_even_if_profile_works(self):
         self.args.health_wait = 130
@@ -393,9 +393,9 @@ class RunnerTests(unittest.TestCase):
             self.runner.status('rate_limit', until=self.t + 120)
             self.runner.sleep(60)
         text = out.getvalue()
-        self.assertIn('RATENLIMIT', text)
-        self.assertIn('Weiter in 2 Min. 00 Sek.', text)
-        self.assertIn('Weiter in 1 Min. 00 Sek.', text)
+        self.assertIn('RATE LIMIT', text)
+        self.assertIn('Resuming in 2 min 00 sec', text)
+        self.assertIn('Resuming in 1 min 00 sec', text)
         self.assertEqual(text.count('[STATUS]'), 3)
         self.assertEqual(self.state.counts(), before)
         self.assertEqual(float(self.state.meta('cooldown_until')), 10120)
@@ -426,22 +426,22 @@ class RunnerTests(unittest.TestCase):
 
     def test_rate_limit_has_display_priority_over_restart_budget(self):
         self.state.meta('cooldown_until', 10120)
-        self.runner.status('restart_budget', '3/3 Neustarts', until=11000)
+        self.runner.status('restart_budget', '3/3 restarts', until=11000)
         saved = json.loads(self.state.meta('runtime_status'))
         self.assertEqual(saved['mode'], 'rate_limit')
         self.assertEqual(saved['until'], 10120)
         text = x.format_runtime_status(saved, self.state.counts(), self.t, 10120)
-        self.assertIn('RATENLIMIT', text)
-        self.assertNotIn('NEUSTARTBUDGET', text)
+        self.assertIn('RATE LIMIT', text)
+        self.assertNotIn('RESTART BUDGET', text)
 
     def test_terminal_status_is_not_overridden_by_old_cooldown(self):
         self.state.meta('cooldown_until', 10120)
-        self.runner.status('stopped', 'Kontowechsel')
+        self.runner.status('stopped', 'Account change')
         saved = json.loads(self.state.meta('runtime_status'))
         self.assertEqual(saved['mode'], 'stopped')
         text = x.format_runtime_status(saved, self.state.counts(), self.t, 10120)
-        self.assertIn('GESTOPPT', text)
-        self.assertNotIn('RATENLIMIT', text)
+        self.assertIn('STOPPED', text)
+        self.assertNotIn('RATE LIMIT', text)
 
     def test_authentication_wait_displays_session_status(self):
         self.args.health_wait = 20
@@ -457,8 +457,8 @@ class RunnerTests(unittest.TestCase):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
             x.show_status(self.path / 'state.sqlite')
-        self.assertIn('VERARBEITUNG', out.getvalue())
-        self.assertIn('keine Live-Prozesspruefung', out.getvalue())
+        self.assertIn('PROCESSING', out.getvalue())
+        self.assertIn('no live process check', out.getvalue())
         self.assertEqual(self.state.meta('runtime_status'), before)
 
     def test_status_without_database_does_not_create_it(self):
@@ -471,8 +471,8 @@ class RunnerTests(unittest.TestCase):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
             x.show_status(self.path / "state.sqlite")
-        self.assertIn("Xbox-Ratenlimit: Pause noch 2 Min.", out.getvalue())
-        self.assertIn("Kein Neustart erforderlich", out.getvalue())
+        self.assertIn("Xbox rate limit: cooldown remaining 2 min", out.getvalue())
+        self.assertIn("No restart required", out.getvalue())
 
     def test_status_does_not_show_expired_pause(self):
         self.state.meta("cooldown_until", x.time.time() - 1)

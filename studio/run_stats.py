@@ -52,4 +52,4 @@ class RunStats:
                 newly_counted = True
         if newly_counted:
             self.state.event(title, 'NewlyCompleted',
-                             f'{len(baseline)} neue Erfolge bestätigt; {count} Spiele in diesem Lauf neu vollständig')
+                             f'New achievements verified: {len(baseline)}; newly completed games in this run: {count}')

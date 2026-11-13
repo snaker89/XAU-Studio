@@ -12,8 +12,6 @@ A Windows desktop application for managing Xbox accounts and resumable, title-ba
 - A per-run counter of newly completed games, excluding games already complete before processing.
 - Search, status filters, CSV import/export, and an activity log.
 
-The desktop interface is currently in German. Repository documentation is in English.
-
 ## Requirements and usage
 
 Windows 10/11 x64, an internet connection, and Microsoft Edge WebView2 Runtime are required. A future portable release will bundle Python and the .NET runtime. The Xbox desktop app is not needed for this application's direct sign-in flow.
@@ -28,9 +26,9 @@ The application starts with an empty catalogue. No separate download of a title 
 
 1. Create a UTF-8, comma-separated `.csv` file with the exact header `ID,Game Title`.
 2. Put one title per row. `ID` is the Xbox **Title ID**, a decimal number from 1 to 4294967295. It is not a Store product ID, achievement ID, or account ID. `Game Title` is an optional display name. Quote names containing commas.
-3. Start XAU Studio and select **“+ Konto anmelden”** to sign in to the intended account.
-4. Open **“Einstellungen”** (Settings) and click **“Titelliste aus CSV ergänzen”** (Add titles from CSV). Select your file.
-5. Click **“Start / Fortsetzen”** (Start / Resume). Imported titles are queued and displayed when the run starts. If the queue is empty, no Xbox requests are made.
+3. Start XAU Studio and select **+ Sign in** to sign in to the intended account.
+4. Open **Settings** and click **Add titles from CSV**. Select your file.
+5. Click **Start / Resume**. Imported titles are queued and displayed when the run starts. If the queue is empty, no Xbox requests are made.
 
 Format example only — these IDs are placeholders, not a usable game catalogue:
 
