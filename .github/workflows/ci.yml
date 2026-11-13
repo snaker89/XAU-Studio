@@ -1,0 +1,18 @@
+name: Build and tests
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: dotnet build studio/XauStudio.csproj -c Release
+      - run: python -m unittest discover -s studio -p "test_*.py"
+      - run: python -m unittest discover -s automation -p test_runner.py

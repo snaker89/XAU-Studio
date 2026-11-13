@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/__pycache__/
+.tools/
+dist/
+outputs/
+*.sqlite*
+*.db
+session.bin
+accounts.json
+preferences.json
+login-webview/
+*.log
+.env*
