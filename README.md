@@ -12,6 +12,16 @@ A Windows desktop application for managing Xbox accounts and resumable, title-ba
 - A per-run counter of newly completed games, excluding games already complete before processing.
 - Search, status filters, CSV import/export, and an activity log.
 
+## Screenshots
+
+Fresh installation without an account or imported title list.
+
+![XAU Studio overview with account sidebar, progress counters and title list](docs/screenshots/overview.png)
+
+Processing settings, including automatic resume, random title order and CSV import.
+
+![XAU Studio processing settings](docs/screenshots/settings.png)
+
 ## Requirements and usage
 
 Windows 10/11 x64, an internet connection, and Microsoft Edge WebView2 Runtime are required. Download the Windows x64 executable from [Releases](https://github.com/snaker89/XAU-Studio/releases/latest). Python and the .NET runtime are bundled. The Xbox desktop app is not needed for this application's direct sign-in flow.
