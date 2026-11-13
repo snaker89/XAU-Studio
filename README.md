@@ -14,7 +14,7 @@ A Windows desktop application for managing Xbox accounts and resumable, title-ba
 
 ## Requirements and usage
 
-Windows 10/11 x64, an internet connection, and Microsoft Edge WebView2 Runtime are required. A future portable release will bundle Python and the .NET runtime. The Xbox desktop app is not needed for this application's direct sign-in flow.
+Windows 10/11 x64, an internet connection, and Microsoft Edge WebView2 Runtime are required. Download the Windows x64 executable from [Releases](https://github.com/snaker89/XAU-Studio/releases/latest). Python and the .NET runtime are bundled. The Xbox desktop app is not needed for this application's direct sign-in flow.
 
 Sign in to your account, import an authorized CSV catalogue with `ID` and optional `Game Title` columns, and start processing. Accounts and progress are stored under `%LOCALAPPDATA%\XauStudioPortable\data`, outside the executable. Updating the executable does not erase those files. Each Start/Resume begins a new run counter; completed-title history persists.
 
@@ -52,7 +52,7 @@ python -m unittest discover -s studio -p "test_*.py"
 python -m unittest discover -s automation -p test_runner.py
 ```
 
-Start the source version with `./Start-XAU-Studio.ps1`. Python 3.12 must be available as `python.exe` on PATH. The mock tests do not unlock real achievements. A portable executable is not part of this initial source publication; release packaging remains tracked in `RELEASE-CHECKLIST.md`.
+Start the source version with `./Start-XAU-Studio.ps1`. Python 3.12 must be available as `python.exe` on PATH. The mock tests do not unlock real achievements. Build the portable executable with `./studio/Build-Portable.ps1` from a Git checkout. The script verifies the official Python 3.12.10 embedded runtime checksum and bundles .NET 9.0.22. Use `-Python` and `-Dotnet` to specify build tools. Output: `dist/XAU-Studio-1.0.0-win-x64.exe`. The executable is unsigned. Corresponding source, licenses and SHA-256 checksums accompany the release.
 
 ## Origins and license
 

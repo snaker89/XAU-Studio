@@ -13,4 +13,4 @@
 | .NET runtime | MIT and bundled third-party notices | https://github.com/dotnet/runtime |
 | Python runtime, when bundled | PSF and included third-party licenses | https://docs.python.org/3/license.html |
 
-The WebView2 browser runtime is installed separately; its terms are distinct from the SDK terms. The release must include notices for the exact Python, .NET, native libraries, and Visual C++ runtime files actually redistributed. The current candidate is source-only and is not a completed binary redistribution audit.
+The WebView2 browser runtime is installed separately; its terms are distinct from the SDK terms. The portable release includes Python 3.12.10's LICENSE.txt and the .NET 9.0.22 notices in LICENSES/. Corresponding source and license notices are embedded and provided as release assets.

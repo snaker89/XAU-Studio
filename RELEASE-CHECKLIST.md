@@ -1,16 +1,12 @@
-# Release checklist
+# Release procedure
 
-The owner authorized a private, source-only repository without a title catalogue. Public visibility and binary release are not enabled by this checklist.
+Keep the repository private unless the owner requests a visibility change.
 
-- [x] Prepare a separate source tree without private accounts, tokens, progress, or logs.
-- [x] Add English documentation, GPLv3 license, upstream attribution, and third-party notices.
-- [x] Publish without a title catalogue; document user-supplied CSV import.
-- [x] Keep all private title catalogues and account fingerprints out of Git.
-- [ ] Make portable packaging reproducible with explicit, pinned build dependencies and complete runtime notices.
-- [ ] Build and test the exact release commit; test a clean Windows user profile.
-- [ ] Scan repository, Git history, source archives, payload archives, and executable inputs for private data.
-- [ ] Create and verify private `snaker89/XAU-Studio`. Public visibility requires a separate instruction.
-- [ ] Tag `v1.0.0-beta.1`, attach the Windows x64 EXE, corresponding source archive, notices, and SHA256SUMS.txt to a prerelease.
-- [ ] Verify uploaded assets and their checksums against the local files.
+1. Update the version and changelog; run the build, Python tests and application self-tests.
+2. Review tracked files for private data. Exclude accounts, sessions, progress, logs and title catalogues.
+3. Commit and build with `studio/Build-Portable.ps1` from that exact commit.
+4. Inspect the payload and run `--portable-check`; verify an empty bundled catalogue and a working Python worker.
+5. Archive corresponding source and licenses, including the Python runtime license; generate SHA256SUMS.txt.
+6. Tag the commit, publish the release, download its assets and verify all checksums.
 
-EXEs belong in GitHub Releases, not in Git history. Every binary must have corresponding source and build instructions. Do not claim code signing unless the binary is actually signed.
+EXEs belong in Releases, not Git history. The executable is unsigned. Mock tests do not verify live Microsoft sign-in or Xbox service availability.

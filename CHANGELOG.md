@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-beta.1 — Unreleased
+## 1.0.0 — 2026-11-13
 
 - New desktop interface and direct Microsoft/Xbox sign-in.
 - Persistent per-account queue and progress.
@@ -8,4 +8,4 @@
 - Corrected achievement update payload (`action: progressUpdate`).
 - Improved error codes, rate-limit handling, and restart behavior.
 
-No title catalogue or binary is included. CSV import works without a bundled catalogue.
+Windows x64 portable executable with Python and .NET included. No title catalogue or account data is included; import your own CSV in Settings.
