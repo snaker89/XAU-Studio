@@ -1,4 +1,4 @@
-# XAU Studio
+# XBOX Achievement Unlocker Studio
 
 A Windows desktop application for managing Xbox accounts and resumable, title-based achievement processing.
 
