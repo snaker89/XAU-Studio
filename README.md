@@ -2,8 +2,6 @@
 
 A Windows desktop application for managing Xbox accounts and resumable, title-based achievement processing.
 
-**Publication candidate ‚Äî not released.** The bundled title catalogue is withheld while redistribution rights are being clarified. No accounts, authentication sessions, progress databases, or private logs are included.
-
 ## Features
 
 - Separate, persistent progress for each Xbox account.
@@ -30,11 +28,11 @@ The application starts with an empty catalogue. No separate download of a title 
 
 1. Create a UTF-8, comma-separated `.csv` file with the exact header `ID,Game Title`.
 2. Put one title per row. `ID` is the Xbox **Title ID**, a decimal number from 1 to 4294967295. It is not a Store product ID, achievement ID, or account ID. `Game Title` is an optional display name. Quote names containing commas.
-3. Start XAU Studio and select **ì+ Konto anmeldenî** to sign in to the intended account.
-4. Open **ìEinstellungenî** (Settings) and click **ìTitelliste aus CSV erg‰nzenî** (Add titles from CSV). Select your file.
-5. Click **ìStart / Fortsetzenî** (Start / Resume). Imported titles are queued and displayed when the run starts. If the queue is empty, no Xbox requests are made.
+3. Start XAU Studio and select **‚Äú+ Konto anmelden‚Äù** to sign in to the intended account.
+4. Open **‚ÄúEinstellungen‚Äù** (Settings) and click **‚ÄúTitelliste aus CSV erg√§nzen‚Äù** (Add titles from CSV). Select your file.
+5. Click **‚ÄúStart / Fortsetzen‚Äù** (Start / Resume). Imported titles are queued and displayed when the run starts. If the queue is empty, no Xbox requests are made.
 
-Format example only ó these IDs are placeholders, not a usable game catalogue:
+Format example only ‚Äî these IDs are placeholders, not a usable game catalogue:
 
 ```csv
 ID,Game Title
